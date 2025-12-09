@@ -1,6 +1,6 @@
 import transporter from "../../../config/mailer.js";
 import { prepareAdminMail, prepareUserMail } from "../processor/mail.processor.js";
-
+import { environment } from "../../../config/env.config.js";
 export default class EmailService {
 
     static async sendMail(mailOptions) {
