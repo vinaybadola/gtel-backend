@@ -1,13 +1,27 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const GeoFeedSchema = new mongoose.Schema({
-    ipPrefix: { type: String, required: true, index: true },
-    countryCode: { type: String },
-    regionCode: { type: String },
-    city: { type: String },
-    postalCode: { type: String },
-}, { timestamps: true });
+const geofeedSchema = new mongoose.Schema(
+    {
+        countryCode: {
+            type: String,
+            required: [true, "Country code is required"],
+            trim: true,
+            minlength: 1,
+            unique: true,
+        },
+        regionCode: String,
+        city: String,
+        postalCode: String,
+        ip: { type: String, required: true , unique: true, index: true},
 
-const GeoFeedData = mongoose.model('GeoFeed', GeoFeedSchema);
+        categories: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Category",
+            },
+        ],
+    },
+    { timestamps: true }
+);
 
-export default GeoFeedData;
+export default mongoose.model("GeoFeed", geofeedSchema);
