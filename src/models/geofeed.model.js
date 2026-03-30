@@ -7,7 +7,6 @@ const geofeedSchema = new mongoose.Schema(
             required: [true, "Country code is required"],
             trim: true,
             minlength: 1,
-            unique: true,
         },
         regionCode: String,
         city: String,

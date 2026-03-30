@@ -33,3 +33,7 @@ export const allowedExposedHeaders = ["Authorization"];
 export const captchaSecretKey = process.env.CAPTCHA_SECRET_KEY;
 export const botBlockerEnable = process.env.BOT_BLOCKER_ENABLE === 'true';
 export const verificationUrl = process.env.VERIFICATION_URL;
+
+
+export const geoFeedServer = process.env.GEO_FEED_SERVER;
+export const geoFeedServerPath = process.env.GEO_FEED_SERVER_BASE_PATH;
