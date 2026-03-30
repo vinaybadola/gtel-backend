@@ -31,43 +31,57 @@ export default class GeoFeedController {
         try {
             const {
                 ip,
+                ips,
                 countryCode,
                 regionCode,
                 city,
                 postalCode,
-                name,
-                categories
+                categories,
+                name
             } = req.body;
 
-            if (!ip || !countryCode) {
-               return errorResponseHandler(res, "IP and Country Code are required", 400);
+            let ipList = [];
+
+            if (ips && Array.isArray(ips)) {
+                ipList = ips.filter(i => i && i.trim() !== "");
+            } else if (ip) {
+                ipList = [ip];
             }
 
+            if (ipList.length === 0 || !countryCode) {
+                return errorResponseHandler(res, "IP and Country Code are required", 400);
+            }
 
-            const newData = new GeoFeedData({
-                ip,
+            const docs = ipList.map((singleIp) => ({
+                ip: singleIp,
                 countryCode,
                 regionCode,
                 city,
                 postalCode,
-                name,
-                categories: categories || []
-            });
+                categories: categories || [],
+                name
+            }));
 
-            await newData.save(newData);
+            let created;
+
+            if (docs.length === 1) {
+                const newData = new GeoFeedData(docs[0]);
+                await newData.save();
+                created = newData;
+            } else {
+                created = await GeoFeedData.insertMany(docs);
+            }
 
             setImmediate(() => {
-                processGeoFeedWrite(newData);
+                processGeoFeedWrite(created);
             });
-
-            return successResponseHandler(res, "Created", 201, newData);
+            return successResponseHandler(res, "Created", 201, created);
 
         } catch (err) {
             console.log("Error creating GeoFeed data:", err);
             return mongoErrorHandler(err, res);
         }
     }
-
     static async updateGeoFeedData(req, res) {
         try {
             const { id } = req.params;
@@ -77,9 +91,19 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
-                name,
-                categories
+                categories,
+                name
             } = req.body;
+
+            if (!ip) {
+                return errorResponseHandler(res, "IP is required for update", 400);
+            }
+
+            const existing = await GeoFeedData.findOne({ ip, _id: { $ne: id } });
+
+            if (existing) {
+                return errorResponseHandler(res, "IP already exists", 400);
+            }
 
             const updated = await GeoFeedData.findByIdAndUpdate(
                 id,
@@ -96,7 +120,7 @@ export default class GeoFeedController {
             ).populate("categories", "name description");
 
             if (!updated) {
-               return errorResponseHandler(res, "GeoFeed not found", 404);
+                return errorResponseHandler(res, "GeoFeed not found", 404);
             }
 
             return successResponseHandler(res, "Updated", 200, updated);
@@ -105,7 +129,6 @@ export default class GeoFeedController {
             return mongoErrorHandler(err, res);
         }
     }
-
     static async fetchAllGeoFeedData(req, res) {
         try {
             let { search = "", categoryId, page = 1, limit = 10 } = req.query;
