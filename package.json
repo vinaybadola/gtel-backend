@@ -21,7 +21,6 @@
     "helmet": "^8.1.0",
     "json2csv": "^6.0.0-alpha.2",
     "mongoose": "^8.19.4",
-    "nodemailer": "^7.0.10",
-    "zod": "^4.1.12"
+    "nodemailer": "^7.0.10"
   }
 }
