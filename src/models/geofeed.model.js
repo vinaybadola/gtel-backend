@@ -11,8 +11,8 @@ const geofeedSchema = new mongoose.Schema(
         regionCode: String,
         city: String,
         postalCode: String,
-        ip: { type: String, required: true , unique: true, index: true},
-
+        ip: { type: String, required: true, unique: true, index: true },
+        name: { type: String, trim: true },
         categories: [
             {
                 type: mongoose.Schema.Types.ObjectId,
