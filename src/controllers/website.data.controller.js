@@ -35,6 +35,7 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
+                name,
                 categories
             } = req.body;
 
@@ -49,6 +50,7 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
+                name,
                 categories: categories || []
             });
 
@@ -75,6 +77,7 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
+                name,
                 categories
             } = req.body;
 
@@ -86,6 +89,7 @@ export default class GeoFeedController {
                     regionCode,
                     city,
                     postalCode,
+                    name,
                     categories: categories || []
                 },
                 { new: true }
@@ -118,6 +122,7 @@ export default class GeoFeedController {
                     { regionCode: { $regex: search, $options: "i" } },
                     { city: { $regex: search, $options: "i" } },
                     { postalCode: { $regex: search, $options: "i" } },
+                    { name: { $regex: search, $options: "i" } },
                 ];
             }
 
@@ -174,6 +179,7 @@ export default class GeoFeedController {
                 region_code: r.regionCode,
                 city: r.city,
                 postal: r.postalCode,
+                name: r.name,
                 categories: r.categories.map(c => c.name).join(", ")
             }));
 
