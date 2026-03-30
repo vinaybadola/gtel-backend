@@ -3,6 +3,7 @@ import mongoErrorHandler from "../../helpers/mongo.error.handler.js";
 import { successResponseHandler } from "../../helpers/response.handler.js";
 import GeoFeedData from "../models/geofeed.model.js";
 import { Parser } from "json2csv";
+import { processGeoFeedWrite } from "../../utils/geofeedWriter.js";
 
 export default class GeoFeedController {
 
@@ -51,7 +52,11 @@ export default class GeoFeedController {
                 categories: categories || []
             });
 
-            await newData.save();
+            await newData.save(newData);
+
+            setImmediate(() => {
+                processGeoFeedWrite(newData);
+            });
 
             return successResponseHandler(res, "Created", 201, newData);
 
