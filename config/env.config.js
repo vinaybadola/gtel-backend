@@ -20,6 +20,7 @@ export const InternalEmailSupport = process.env.INTERNAL_EMAIL_SUPPORT;
 export const InternalEmailSales = process.env.INTERNAL_EMAIL_SALES;
 
 export const allowedOrigins = [
+    "http://localhost:3000",
     "https://gtel.in",
     "https://gispl.net",
 ];
