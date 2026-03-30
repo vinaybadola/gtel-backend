@@ -53,6 +53,7 @@ export const processGeoFeedWrite = async (data) => {
 
         // category-specific buffers
         categoryNames.forEach(cat => {
+            if (cat === "general") return;
             if (!buffers[cat]) buffers[cat] = [];
             buffers[cat].push(payload);
         });
@@ -73,7 +74,7 @@ setInterval(() => {
 
         const fileName =
             key === "general"
-                ? "geofeed.csv"
+                ? "test-geofeed.csv"
                 : `${key}-geofeed.csv`;
 
         const remotePath = `${geoFeedServerPath}/${fileName}`;

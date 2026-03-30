@@ -35,13 +35,13 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
-                categories
+                categories,
+                name
             } = req.body;
 
             if (!ip || !countryCode) {
-               return errorResponseHandler(res, "IP and Country Code are required", 400);
+                return errorResponseHandler(res, "IP and Country Code are required", 400);
             }
-
 
             const newData = new GeoFeedData({
                 ip,
@@ -49,7 +49,8 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
-                categories: categories || []
+                categories: categories || [],
+                name
             });
 
             await newData.save(newData);
@@ -75,7 +76,8 @@ export default class GeoFeedController {
                 regionCode,
                 city,
                 postalCode,
-                categories
+                categories,
+                name
             } = req.body;
 
             const updated = await GeoFeedData.findByIdAndUpdate(
@@ -86,13 +88,14 @@ export default class GeoFeedController {
                     regionCode,
                     city,
                     postalCode,
+                    name,
                     categories: categories || []
                 },
                 { new: true }
             ).populate("categories", "name description");
 
             if (!updated) {
-               return errorResponseHandler(res, "GeoFeed not found", 404);
+                return errorResponseHandler(res, "GeoFeed not found", 404);
             }
 
             return successResponseHandler(res, "Updated", 200, updated);
@@ -118,6 +121,7 @@ export default class GeoFeedController {
                     { regionCode: { $regex: search, $options: "i" } },
                     { city: { $regex: search, $options: "i" } },
                     { postalCode: { $regex: search, $options: "i" } },
+                    { name: { $regex: search, $options: "i" } },
                 ];
             }
 
@@ -174,6 +178,7 @@ export default class GeoFeedController {
                 region_code: r.regionCode,
                 city: r.city,
                 postal: r.postalCode,
+                name: r.name,
                 categories: r.categories.map(c => c.name).join(", ")
             }));
 
