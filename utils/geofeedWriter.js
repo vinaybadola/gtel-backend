@@ -18,72 +18,79 @@ const buildRow = (data) => [
     safe(data.postalCode)
 ].join(",");
 
-// get header dynamically
 const getHeader = (key) => {
     const headers = HEADER_CONFIG[key] || HEADER_CONFIG.general;
     return headers.join(",");
 };
 
-// push row to buffer
 export const processGeoFeedWrite = async (data) => {
     try {
-        const {
-            ip,
-            countryCode,
-            regionCode,
-            city,
-            postalCode,
-            categories = []
-        } = data;
+        const documents = Array.isArray(data) ? data : [data];
 
-        let categoryDocs = [];
+        console.log(`Processing ${documents.length} GeoFeed document(s)`);
 
-        if (categories.length > 0) {
-            categoryDocs = await categoryModel.find({
-                _id: { $in: categories }
-            }).select("name").lean();
+        for (const doc of documents) {
+            const {
+                ip,
+                countryCode,
+                regionCode,
+                city,
+                postalCode,
+                categories = []
+            } = doc;
+
+            console.log(`Processing IP: ${ip}, Categories: ${categories.length}`);
+
+            let categoryDocs = [];
+
+            if (categories.length > 0) {
+                categoryDocs = await categoryModel.find({
+                    _id: { $in: categories }
+                }).select("name").lean();
+            }
+
+            const categoryNames = categoryDocs.map(c => c.name.toLowerCase());
+
+            const payload = { ip, countryCode, regionCode, city, postalCode };
+
+            // always write to general
+            buffers.general.push(payload);
+            console.log(`Added to general buffer for IP: ${ip}`);
+
+            // category-specific buffers
+            categoryNames.forEach(cat => {
+                if (cat === "general") return;
+                if (!buffers[cat]) buffers[cat] = [];
+                buffers[cat].push(payload);
+                console.log(`Added to ${cat} buffer for IP: ${ip}`);
+            });
         }
 
-        const categoryNames = categoryDocs.map(c => c.name.toLowerCase());
-
-        const payload = { ip, countryCode, regionCode, city, postalCode };
-
-        // always write to general
-        buffers.general.push(payload);
-
-        // category-specific buffers
-        categoryNames.forEach(cat => {
-            if (cat === "general") return;
-            if (!buffers[cat]) buffers[cat] = [];
-            buffers[cat].push(payload);
-        });
+        console.log(`Total items in general buffer: ${buffers.general.length}`);
 
     } catch (err) {
         console.error("GeoFeed async processing error:", err);
     }
 };
 
-// flush buffer every 5 sec
 setInterval(() => {
     Object.keys(buffers).forEach((key) => {
         const items = buffers[key];
 
         if (!items.length) return;
 
-        buffers[key] = []; // reset early
+        buffers[key] = [];
 
         const fileName =
             key === "general"
-                ? "test-geofeed.csv"
+                ? "geofeed.csv"
                 : `${key}-geofeed.csv`;
 
         const remotePath = `${geoFeedServerPath}/${fileName}`;
 
-        // build rows (same structure everywhere)
         const rows = items.map(buildRow);
         const data = rows.join("\n");
 
-        // escape for SSH
         const safeData = data.replace(/"/g, '\\"');
 
         const header = getHeader(key);
