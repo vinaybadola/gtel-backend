@@ -82,6 +82,7 @@ export default class GeoFeedController {
             return mongoErrorHandler(err, res);
         }
     }
+
     static async updateGeoFeedData(req, res) {
         try {
             const { id } = req.params;
@@ -129,6 +130,7 @@ export default class GeoFeedController {
             return mongoErrorHandler(err, res);
         }
     }
+
     static async fetchAllGeoFeedData(req, res) {
         try {
             let { search = "", categoryId, page = 1, limit = 10 } = req.query;
