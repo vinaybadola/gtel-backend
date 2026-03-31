@@ -18,13 +18,11 @@ const buildRow = (data) => [
     safe(data.postalCode)
 ].join(",");
 
-// get header dynamically
 const getHeader = (key) => {
     const headers = HEADER_CONFIG[key] || HEADER_CONFIG.general;
     return headers.join(",");
 };
 
-// push row to buffer
 export const processGeoFeedWrite = async (data) => {
     try {
         const documents = Array.isArray(data) ? data : [data];
@@ -75,7 +73,6 @@ export const processGeoFeedWrite = async (data) => {
     }
 };
 
-// flush buffer every 5 sec
 setInterval(() => {
     Object.keys(buffers).forEach((key) => {
         const items = buffers[key];
@@ -86,16 +83,14 @@ setInterval(() => {
 
         const fileName =
             key === "general"
-                ? "test-geofeed.csv"
+                ? "geofeed.csv"
                 : `${key}-geofeed.csv`;
 
         const remotePath = `${geoFeedServerPath}/${fileName}`;
 
-        // build rows (same structure everywhere)
         const rows = items.map(buildRow);
         const data = rows.join("\n");
 
-        // escape for SSH
         const safeData = data.replace(/"/g, '\\"');
 
         const header = getHeader(key);
