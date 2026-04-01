@@ -11,5 +11,6 @@ router.get("/geofeed-data", WebsiteDataController.fetchAllGeoFeedData);
 router.get("/geofeed.csv", WebsiteDataController.downloadGeoFeedCSV);
 router.put("/geofeed-data/:id", IdValidator, handleValidationErrors, WebsiteDataController.updateGeoFeedData);
 router.post("/delete-geofeed/:id",IdValidator, handleValidationErrors, WebsiteDataController.deleteGeoFeed);
+router.get("/header-config", WebsiteDataController.getHeaderConfig);
 
 export default router;
