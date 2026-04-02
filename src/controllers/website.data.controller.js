@@ -1,9 +1,10 @@
 import PlanModel from "../models/plan.request.model.js";
 import mongoErrorHandler from "../../helpers/mongo.error.handler.js";
-import { successResponseHandler } from "../../helpers/response.handler.js";
+import { errorResponseHandler, successResponseHandler } from "../../helpers/response.handler.js";
 import GeoFeedData from "../models/geofeed.model.js";
 import { Parser } from "json2csv";
 import { processGeoFeedWrite } from "../../utils/geofeedWriter.js";
+import { HEADER_CONFIG } from "../../config/geofeed.config.js";
 
 export default class GeoFeedController {
 
@@ -221,4 +222,22 @@ export default class GeoFeedController {
             return mongoErrorHandler(err, res);
         }
     }
+
+static async getHeaderConfig(req, res) {
+    try {
+        const { type } = req.query;
+
+        const config = HEADER_CONFIG[type?.toLowerCase()];
+
+        if (!config) {
+           return errorResponseHandler(res, "Invalid category type", 400);
+        }
+
+        return successResponseHandler(res, "Fetched", 200, config);
+
+    } catch (err) {
+        console.log("Error fetching header config:", err);
+        return mongoErrorHandler(err, res);
+    }
+}
 }
